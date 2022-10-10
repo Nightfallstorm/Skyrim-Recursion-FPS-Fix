@@ -1,3 +1,5 @@
+#include "hooks.h"
+
 void InitializeLog()
 {
 	auto path = logger::log_directory();
@@ -22,6 +24,8 @@ void InitializeLog()
 
 void InitializeHooking() {
 	logger::trace("Initializing StackFrameOverflow hook...");
+	StackOverFlowHook::Install();
+	StackOverFlowLogHook::Install();
 }
 
 extern "C" DLLEXPORT constinit auto SKSEPlugin_Version = []() {
