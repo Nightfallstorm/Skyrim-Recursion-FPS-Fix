@@ -1,6 +1,6 @@
 # Skyrim Recursion FPS Fix
 
-TBD
+Fixes FPS lag when a papyrus function gets stuck in a recursion loop 
 
 ## Requirements
 * [CMake](https://cmake.org/)
