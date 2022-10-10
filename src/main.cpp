@@ -31,7 +31,7 @@ void InitializeHooking() {
 extern "C" DLLEXPORT constinit auto SKSEPlugin_Version = []() {
 	SKSE::PluginVersionData v;
 	v.PluginVersion(Version::MAJOR);
-	v.PluginName("Skyrim Recursion FPS Fix");
+	v.PluginName("Recursion FPS Fix");
 	v.AuthorName("nightfallstorm");
 	v.UsesAddressLibrary(true);
 	v.HasNoStructUse(true);
