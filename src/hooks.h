@@ -5,7 +5,15 @@ struct StackOverFlowHook
 	static RE::BSFixedString* thunk(std::uint64_t unk0, RE::BSScript::Stack* a_stack, std::uint64_t* a_funcCallQuery)
 	{
 		if (a_stack != nullptr && a_stack->frames > 1000) {
-			logger::info("Detected 1000+ recursive call! Will throw error in papyrus log");
+			RE::BSScript::Internal::IFuncCallQuery::CallType ignore;
+			RE::BSTSmartPointer<RE::BSScript::ObjectTypeInfo> scriptInfo;
+			RE::BSScript::Variable ignore2;
+			RE::BSScrapArray<RE::BSScript::Variable> ignore3;
+			RE::BSFixedString functionName;
+			a_stack->owningTasklet.get()->GetFunctionCallInfo(ignore, scriptInfo, functionName, ignore2, ignore3);
+			logger::info("Detected 1000+ recursive call on function {} for script {}", functionName, scriptInfo.get()->GetName());
+			auto message = std::format("Warning, function {} in script {} got stuck in a recursion loop. Exited loop to prevent performance issues. Please notify author to fix and check papyrus logs for more info", functionName.c_str(), scriptInfo.get()->GetName());
+			RE::DebugMessageBox(message.c_str());
 			*a_funcCallQuery = 0;
 		}
 		return func(unk0, a_stack, a_funcCallQuery);
