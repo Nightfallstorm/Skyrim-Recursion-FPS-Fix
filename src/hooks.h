@@ -11,12 +11,46 @@ struct StackOverFlowHook
 			RE::BSScrapArray<RE::BSScript::Variable> ignore3;
 			RE::BSFixedString functionName;
 			a_stack->owningTasklet.get()->GetFunctionCallInfo(ignore, scriptInfo, functionName, ignore2, ignore3);
-			logger::info("Detected 1000+ recursive call on function {} for script {}", functionName, scriptInfo.get()->GetName());
-			auto message = std::format("Warning, function {} in script {} got stuck in a recursion loop. Exited loop to prevent performance issues. Please notify author to fix and check papyrus logs for more info", functionName.c_str(), scriptInfo.get()->GetName());
-			RE::DebugMessageBox(message.c_str());
-			*a_funcCallQuery = 0;
+			logger::info("Detected 1000+  call on function {} for script {}", functionName, scriptInfo.get()->GetName());
+			if (IsCallInStack(a_stack, scriptInfo.get()->GetName(), functionName.c_str()) == true) {
+				auto message = std::format("Warning, function {} in script {} got stuck in a recursion loop. Exited loop to prevent performance issues. Please notify author to fix and check papyrus logs for more info", functionName.c_str(), scriptInfo.get()->GetName());
+				RE::DebugMessageBox(message.c_str());
+				*a_funcCallQuery = 0;
+			} else {
+				// might be a regular native call or something not directly causing recursion, don't break it yet
+			}
+			
 		}
 		return func(unk0, a_stack, a_funcCallQuery);
+	}
+
+	static bool IsCallInStack(RE::BSScript::Stack* a_stack, const char* scriptName, const char* functionName) {
+		RE::BSScript::StackFrame* stackFrame = a_stack->top;
+		if (stackFrame == nullptr) {
+			return false;
+		}
+		stackFrame = stackFrame->previousFrame; // Get the frame before the current function call, as we don't want to check against ourselves
+		while (stackFrame != nullptr) { // Loop through all frames in the stack
+			if (stackFrame->owningFunction && stackFrame->owningFunction.get()) {
+				if (iequals(std::string(stackFrame->owningFunction.get()->GetObjectTypeName().c_str()), scriptName) &&
+					iequals(std::string(stackFrame->owningFunction.get()->GetName().c_str()), functionName)) {
+					return true;
+				}
+			}
+			stackFrame = stackFrame->previousFrame;
+		}
+		return false;
+	}
+
+	static bool iequals(const std::string& a, const std::string& b)
+	{
+		std::size_t sz = a.size();
+		if (b.size() != sz)
+			return false;
+		for (unsigned int i = 0; i < sz; ++i)
+			if (tolower(a[i]) != tolower(b[i]))
+				return false;
+		return true;
 	}
 
 	static inline REL::Relocation<decltype(thunk)> func;
@@ -27,8 +61,8 @@ struct StackOverFlowHook
 		REL::Relocation<std::uintptr_t> target{ RELOCATION_ID(98130, 104853), REL::VariantOffset(0x7F, 0x7F, 0x7F) };
 		stl::write_thunk_call<StackOverFlowHook>(target.address());
 
-		logger::info("StackFrameOverFlow hooked at address " + fmt::format("{:x}", target.address()));
-		logger::info("StackFrameOverFlow hooked at offset " + fmt::format("{:x}", target.offset()));
+		logger::info("StackFrameOverFlow hooked at address {}", fmt::format("{:x}", target.address()));
+		logger::info("StackFrameOverFlow hooked at offset {}", fmt::format("{:x}", target.offset()));
 	}
 };
 
@@ -51,7 +85,7 @@ struct StackOverFlowLogHook
 		REL::Relocation<std::uintptr_t> target{ RELOCATION_ID(98130, 104853), REL::VariantOffset(0x963, 0x97A, 0x963) };
 		stl::write_thunk_call<StackOverFlowLogHook>(target.address());
 
-		logger::info("StackFrameOverFlowLog hooked at address " + fmt::format("{:x}", target.address()));
-		logger::info("StackFrameOverFlowLog hooked at offset " + fmt::format("{:x}", target.offset()));
+		logger::info("StackFrameOverFlowLog hooked at address {}", fmt::format("{:x}", target.address()));
+		logger::info("StackFrameOverFlowLog hooked at offset {}", fmt::format("{:x}", target.offset()));
 	}
 };
