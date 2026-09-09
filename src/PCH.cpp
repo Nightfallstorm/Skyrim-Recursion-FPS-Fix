@@ -1,3 +1,6 @@
+#include <spdlog/sinks/basic_file_sink.h>
+#include <xbyak/xbyak.h>
+
 namespace stl
 {
 	namespace detail
