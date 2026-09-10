@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.20)
 set(NAME "RecursionFPSFix")
 set(AUTHOR "nightfallstorm")
-set(VERSION 1.1.0)
+set(VERSION 1.2.0)
 
 if (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/local-env.cmake)
 	include(${CMAKE_CURRENT_SOURCE_DIR}/local-env.cmake)
